@@ -23,9 +23,11 @@ How to run?
 ./HGCTBAna.exe InputFie OutputFile TotalEvent ReportEvery MIPCut
 
 Example:
+
 ./HGCTBAna.exe /afs/cern.ch/work/a/asroy/public/HGCalTB2018/SIMtoDataFormat/CMSSW_9_3_0/src/HGCal/ntupleNewBeamProfEleE100.root HGCTBAnaOutput.root 10000 1000 1.0
 
 Or,
+
 ./run.sh  
 
 
