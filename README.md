@@ -7,10 +7,15 @@ Instruction:
 Since it is not depend on the CMSSW, any CMSSW release can be used to import ROOT.
 
 cmsrel CMSSW_11_0_0_pre5
+
 cd CMSSW_11_0_0_pre5/src
+
 cmsenv
+
 git clone https://github.com/ashimroy/HGCTB18Analysis.git
+
 make
+
 
 That's it. Ready to run.
 
