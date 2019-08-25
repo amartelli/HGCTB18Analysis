@@ -127,20 +127,17 @@ double HGCTBAlgo::MaxHitE(){
 // Return layerwise sum rechit energy with a given threshold cut
 double HGCTBAlgo::SumELayer(unsigned int layer){
   float ilay_sum_en=0;
-  for (unsigned int ilayer=0; ilayer < layer_sum_en.size(); ilayer++){
-    if (debug) cout << "Layer SumE : " << ilayer+1 << " " << layer_sum_en[ilayer] <<endl;
-    if (ilayer==layer-1)  ilay_sum_en= layer_sum_en[ilayer]; 
-  }
+  if (debug) cout << "Layer SumE : " << layer << " " << layer_sum_en[layer-1] <<endl;
+  ilay_sum_en= layer_sum_en[layer-1]; 
+  
   return ilay_sum_en;
 }
 
 // Return layerwise maximum hit cell energy
 double HGCTBAlgo::MaxHitELayer(unsigned int layer){
   float ilay_max_en=0;
-  for (unsigned int ilayer=0; ilayer < layer_maxhit_en.size(); ilayer++){
-    if (debug) cout << "Layer MaxE : " << ilayer+1 << " " << layer_maxhit_en[ilayer] <<endl;
-    if (ilayer==layer-1)  ilay_max_en= layer_maxhit_en[ilayer];
-  }
+  if (debug) cout << "Layer MaxE : " << layer << " " << layer_maxhit_en[layer-1] <<endl;
+  ilay_max_en= layer_maxhit_en[layer-1];
   return ilay_max_en;
 }
 
