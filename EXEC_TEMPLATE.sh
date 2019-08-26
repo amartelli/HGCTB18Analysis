@@ -7,8 +7,14 @@ then
     InputFileName=HGCTB18_DataNtuple_#Par#E#Energy#.root  ## Data
     OutputFile=HGCTBAnaOutput_#DataType#_#Par#E#Energy#_#TagData#.root
 else
-    InputFilePath=/eos/cms/store/group/dpg_hgcal/tb_hgcal/simulation2018/HGCal_TB18_October_ConfigurationI/BeamMomProfileGun_VtxGaus/ntuples/
-    InputFileName=ntuple_sim_config22_pdgID11_beamMomentum#Energy#.root  ##MC
+### MC1 ###
+#    InputFilePath=/eos/cms/store/group/dpg_hgcal/tb_hgcal/simulation2018/HGCal_TB18_October_ConfigurationI/BeamMomProfileGun_VtxGaus/ntuples/
+#    InputFileName=ntuple_sim_config22_pdgID11_beamMomentum#Energy#.root  ##MC
+#    OutputFile=HGCTBAnaOutput_#DataType#_#Par#E#Energy#_#TagMC#.root
+
+### MC2 ###
+    InputFilePath=/eos/cms/store/group/dpg_hgcal/tb_hgcal/2018/cern_h2_october/offline_analysis/sim_ntuples/v2/withMCP/EMN/Angle/
+    InputFileName=ntuple_sim_config22_pdgID11_beamMomentum#Energy#_listFTFP_BERT_EMN.root
     OutputFile=HGCTBAnaOutput_#DataType#_#Par#E#Energy#_#TagMC#.root
 fi
 

@@ -15,9 +15,10 @@ function float_eval()
 }
 
 Par="Ele"
-DataType="Data"
-#DataType="MC"
-TagMC="BeamProf_v1"
+#DataType="Data"
+DataType="MC"
+#TagMC="BeamProf_v1"
+TagMC="v2_withMCP_EMN_Angle"
 TagData="v13"
 
 En=( 20 30 50 80 100 120 200 250 300 )
