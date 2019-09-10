@@ -4,7 +4,7 @@
 #include <TStyle.h>
 #include <TCanvas.h>
 #include "TStopwatch.h"
-
+#include <algorithm> // for find function of vector
 // User defined Class
 #include "HGCTBAlgo.C"
 
@@ -52,15 +52,34 @@ void HGCTBAna::Loop(string outputfile, int nTotEvt, int nPrintEvent, float mipCu
       nb = fChain->GetEntry(jentry);   nbytes += nb;
       // if (Cut(ientry) < 0) continue;
 
+      // Friend Tree Class
+      fOther->GetEntry(jentry); 
+
       if (jentry % nPrintEvent == 0) std::cout << "  " << jentry  << "  Events Processed... " << std::endl;
+
+      if (fOther->dwcReferenceType != 13) continue;
+
+      nLayer=rechit_layer->back();
+      //cout << "nLayer: " << nLayer << endl;
+
+      // Removal of pion contamination 
+      int nRecHitsFH=0;
+      if (nLayer>28) {
+	for (unsigned int irechit=rechit_layer->size()-1; irechit > 0; irechit--) {
+	  if (rechit_layer->at(irechit) <= 28) break;
+	  nRecHitsFH++;
+	}
+      }
+      //cout << "nRecHitsFH: " << nRecHitsFH << endl;
+      if (nRecHitsFH>80) continue; // cut applied to remove pion contamination
 
       // Initializing HGCTBAlgo Class //
       h1.Init(*rechit_energy, *rechit_layer, *rechit_iu, *rechit_iv,
-              *rechit_x,  *rechit_y,  mipCut);
+              *rechit_x,  *rechit_y, *rechit_chip, *rechit_channel, mipCut);
 
       sumEAll = h1.SumE();
       //cout << "Sum Rechit Energy All:  " <<  sumEAll << endl;
-      nLayer=rechit_layer->back();
+
       for (unsigned int iLayer=1; iLayer <= rechit_layer->back(); iLayer++){
 	float sumE = h1.SumELayer(iLayer);
 	float maxE = h1.MaxHitELayer(iLayer);

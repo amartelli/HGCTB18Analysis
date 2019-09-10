@@ -11,6 +11,7 @@
 #include <TROOT.h>
 #include <TChain.h>
 #include <TFile.h>
+#include "impactPoints.C" // For accessing other tree variables
 
 // Header file for the classes stored in the TTree if any.
 #include "vector"
@@ -24,6 +25,8 @@ class HGCTBAna {
 public :
    TTree          *fChain;   //!pointer to the analyzed TTree or TChain
    Int_t           fCurrent; //!current Tree number in a TChain
+
+   impactPoints   *fOther;  // for Friend Tree
 
 // Fixed size dimensions of array or collections stored in the TTree if any.
 
@@ -179,15 +182,19 @@ HGCTBAna::HGCTBAna(string infile, TTree *tree) : fChain(0)
   
    TString inputfile = infile;
    cout<<"Input file : " << inputfile << endl;
-   
+   TTree *tree2;   
+
    if (tree == 0) {
      TFile *f = TFile::Open(inputfile);
 
-     TDirectory *dir = dynamic_cast<TDirectory*>(f->Get("rechitntupler"));
-     dir->GetObject("hits",tree);
+     TDirectory *dir1 = dynamic_cast<TDirectory*>(f->Get("rechitntupler"));
+     dir1->GetObject("hits",tree);
+     TDirectory *dir2 = dynamic_cast<TDirectory*>(f->Get("trackimpactntupler"));
+     dir2->GetObject("impactPoints",tree2);
    }
-
    Init(tree);
+
+   fOther = new impactPoints(tree2);
 }
 
 HGCTBAna::~HGCTBAna()
