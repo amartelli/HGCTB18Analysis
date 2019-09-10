@@ -21,6 +21,7 @@ public :
   void   Init(std::vector<float>& rechit_energy, std::vector<unsigned int>& rechit_layer,
 	      std::vector<short int>& rechit_iu, std::vector<short int>& rechit_iv,
 	      std::vector<float>& rechit_x,      std::vector<float>& rechit_y,
+	      std::vector<unsigned int>& rechit_chip,     std::vector<unsigned int>& rechit_channel,
 	      float cut);
   double SumE();
   double MaxHitE();
@@ -46,7 +47,8 @@ private :
 
 void HGCTBAlgo::Init(std::vector<float>& rechit_energy, std::vector<unsigned int>& rechit_layer,
 		     std::vector<short int>& rechit_iu, std::vector<short int>& rechit_iv,
-		     std::vector<float>& rechit_x, std::vector<float>& rechit_y,
+		     std::vector<float>& rechit_x,      std::vector<float>& rechit_y,
+		     std::vector<unsigned int>& rechit_chip,     std::vector<unsigned int>& rechit_channel,
 		     float cut){
 
   float sum_rh_en=0, max_rh_en=0; 
@@ -71,6 +73,14 @@ void HGCTBAlgo::Init(std::vector<float>& rechit_energy, std::vector<unsigned int
     //cout << "istart_layer: " << istart_layer << endl;
     for (unsigned int irechit=istart_layer; irechit < rechit_energy.size(); irechit++){
       if (rechit_layer[irechit] != ilayer) break;
+
+      // Masking of chip 0 in layer 1 (and channel 22 of 3 chip) :  For removal of electronic noise 
+      if (rechit_layer[irechit] == 1 &&  
+	  (rechit_chip[irechit] == 0 || 
+	   (rechit_chip[irechit] == 3 && rechit_channel[irechit] == 22) ) ) {
+	continue;
+      }
+
       //cout << "irechit: " << irechit << endl;
   
       if(rechit_energy[irechit]>=cut) sum_rh_en+=rechit_energy[irechit];
