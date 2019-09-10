@@ -50,8 +50,8 @@ void HGCTBAlgo::Init(std::vector<float>& rechit_energy, std::vector<unsigned int
 		     float cut){
 
   float sum_rh_en=0, max_rh_en=0; 
-  layer_imax.clear();
-  layer_maxhit_uv.clear();  layer_maxhit_en.clear();
+  layer_imax.clear();       layer_maxhit_uv.clear();
+  layer_maxhit_xy.clear();  layer_maxhit_en.clear();
   layer_sum_en.clear();     layer_rechit_en.clear();  
   layer_rechit_u.clear();   layer_rechit_v.clear();
   layer_rechit_x.clear();   layer_rechit_y.clear();
@@ -146,11 +146,36 @@ double HGCTBAlgo::MaxHitELayer(unsigned int layer){
 // For R1 extend=0, R7 extend=1 and so on
 // Include the cells in the cluster with a given threshold energy cut
 double HGCTBAlgo::Cluster(unsigned int layer, int extend, float cut){
+
+  int u=0,v=0; float clusterE=0;
+  u=layer_maxhit_uv[layer-1].first, v=layer_maxhit_uv[layer-1].second;
+  if (debug) cout << "MaxHit iu,iv :" <<u << "," << v << endl;
+
+  for(unsigned int j=0; j<layer_rechit_en[layer-1].size(); j++) {
+    int iu=layer_rechit_u[layer-1][j], iv=layer_rechit_v[layer-1][j];
+
+    if( iu>=u-extend && iu<=u+extend &&
+        iv>=v-extend && iv<=v+extend &&
+        iu+iv>=u+v-extend && iu+iv<=u+v+extend &&
+        layer_rechit_en[layer-1][j]>=cut ) {
+
+      clusterE+=layer_rechit_en[layer-1][j];
+      if (debug) cout << iu << ":" << iv << endl;
+    }
+
+  }
+
+  if (debug) cout << "clusterE: " << clusterE << endl;
+  return clusterE;
+}
+
+/*
+double HGCTBAlgo::Cluster(unsigned int layer, int extend, float cut){
   vector< pair<int,int> > uv0; uv0.clear();
   for (int iu=-extend;iu<=extend;iu++){
     for (int iv=-extend;iv<=extend;iv++){
       if ( std::abs(iu+iv)>= extend+1 )	continue;
-      //      cout << iu << ":" << iv << endl;
+      //cout << iu << ":" << iv << endl;
       uv0.push_back( make_pair(iu,iv) ); 
     }
   }  
@@ -158,15 +183,18 @@ double HGCTBAlgo::Cluster(unsigned int layer, int extend, float cut){
   int u=0,v=0; float clusterE=0;
   u=layer_maxhit_uv[layer-1].first, v=layer_maxhit_uv[layer-1].second;
   if (debug) cout << "MaxHit iu,iv :" <<u << "," << v << endl;
+
   for (unsigned int i=0;i<uv0.size();i++){
     int nu= u+uv0[i].first;
     int nv= v+uv0[i].second;
-    //cout << nu << ":" << nv << endl;
+    if (debug) cout << nu << ":" << nv << endl;
     for(unsigned int j=0; j<layer_rechit_en[layer-1].size(); j++){
       if(layer_rechit_u[layer-1][j]==nu && layer_rechit_v[layer-1][j]==nv 
 	 && layer_rechit_en[layer-1][j]>=cut) clusterE+=layer_rechit_en[layer-1][j];  
     }
   }
+  if (debug) cout << "clusterE: " << clusterE << endl;
   return clusterE;
 }
+*/
 
