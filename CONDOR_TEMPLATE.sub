@@ -3,7 +3,7 @@ universe = vanilla
 executable  = exec_#Par##Energy#GeV.sh
 
 ShouldTransferFiles  = yes
-Transfer_Input_Files =  HGCTBAna.h, HGCTBAna.C,HGCTBAlgo.C,main.C,Makefile
+Transfer_Input_Files =  HGCTBAna.h, HGCTBAna.C,HGCTBAlgo.C,impactPoints.h,impactPoints.C,main.C,Makefile
 
 output      = Out_#Par##Energy#GeV.out
 error       = Out_#Par##Energy#GeV.err

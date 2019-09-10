@@ -1,19 +1,5 @@
 #!/bin/bash
 
-float_scale=2
-function float_eval()
-{
-    local stat=0
-    local result=0.0
-    if [[ $# -gt 0 ]]; then
-        result=$(echo "scale=$float_scale; $*" | bc -q 2>/dev/null)
-        stat=$?
-        if [[ $stat -eq 0  &&  -z "$result" ]]; then stat=1; fi
-    fi
-    echo $result
-    return $stat
-}
-
 Par="Ele"
 #DataType="Data"
 DataType="MC"
@@ -39,7 +25,7 @@ else
     TagDir="$TagMC"
 fi
 
-cp HGCTBAna.C  HGCTBAna.h  HGCTBAlgo.C main.C Makefile $DataType/$TagDir
+cp HGCTBAna.C  HGCTBAna.h  HGCTBAlgo.C impactPoints.h impactPoints.C main.C Makefile $DataType/$TagDir
 cp *TEMPLATE* $DataType/$TagDir
 cd $DataType/$TagDir
 
