@@ -28,9 +28,11 @@ void HGCTBHisto::Loop(string outputfile, int nMaxEvt, int nPrintEvent, float bea
    //beamE = 100.;
    unsigned int maxLayerEE=28;
 
-   int nBin=100;
-   float minBin1=0., maxBin1=120*beamE;
+   int nBin1=150;
+   int nBin2=100;
+   float minBin1=0., maxBin1=150*beamE;
    float minBin2=0., maxBin2=20*beamE;
+   TH1F *h_NLayer;
    TH1F *h_SumEAll;
    TH1F *h_SumELayer[maxLayerEE];
    TH1F *h_E1Layer[maxLayerEE];
@@ -42,28 +44,30 @@ void HGCTBHisto::Loop(string outputfile, int nMaxEvt, int nPrintEvent, float bea
    TH1F *h_E7byEAllLayer[maxLayerEE];
    TH1F *h_E19byEAllLayer[maxLayerEE];
 
+   h_NLayer  = new TH1F("h_NLayer","# of layer with last Hit",
+			   50,0,50);
    h_SumEAll  = new TH1F("h_SumEAll","Sum Rechits of All Layers",
-			   nBin,minBin1,maxBin1);
+			   nBin1,minBin1,maxBin1);
 
    for (unsigned int ilayer=0; ilayer<maxLayerEE; ilayer++){
      h_SumELayer[ilayer]      = new TH1F(Form("h_SumELayer%d",ilayer+1),Form("Sum Rechits of Layer%d",ilayer+1),
-				    nBin,minBin2,maxBin2);
+				    nBin2,minBin2,maxBin2);
      h_E1Layer[ilayer]        = new TH1F(Form("h_E1Layer%d",ilayer+1),Form("E1 of Layer%d",ilayer+1),
-				    nBin,minBin2,maxBin2);
+				    nBin2,minBin2,maxBin2);
      h_E7Layer[ilayer]        = new TH1F(Form("h_E7Layer%d",ilayer+1),Form("E7 of Layer%d",ilayer+1),
-				    nBin,minBin2,maxBin2);
+				    nBin2,minBin2,maxBin2);
      h_E19Layer[ilayer]       = new TH1F(Form("h_E19Layer%d",ilayer+1),Form("E19 of Layer%d",ilayer+1),
-				    nBin,minBin2,maxBin2);
+				    nBin2,minBin2,maxBin2);
      h_E1byE7Layer[ilayer]    = new TH1F(Form("h_E1byE7Layer%d",ilayer+1),Form("E1byE7 of Layer%d",ilayer+1),
-				    nBin,0.,1.0);
+				    nBin2,0.,1.0);
      h_E1byE19Layer[ilayer]   = new TH1F(Form("h_E1byE19Layer%d",ilayer+1),Form("E1byE19 of Layer%d",ilayer+1),
-				    nBin,0.,1.0);
+				    nBin2,0.,1.0);
      h_E7byE19Layer[ilayer]   = new TH1F(Form("h_E7byE19Layer%d",ilayer+1),Form("E7byE19 of Layer%d",ilayer+1),
-				    nBin,0.,1.0);
+				    nBin2,0.,1.0);
      h_E7byEAllLayer[ilayer]  = new TH1F(Form("h_E7byEAllLayer%d",ilayer+1),Form("E7byEAll of Layer%d",ilayer+1),
-				    nBin,0.,1.0);
+				    nBin2,0.,1.0);
      h_E19byEAllLayer[ilayer] = new TH1F(Form("h_E19byEAllLayer%d",ilayer+1),Form("E19byEAll of Layer%d",ilayer+1),
-				    nBin,0.,1.0);
+				    nBin2,0.,1.0);
        }
 
    Long64_t nbytes = 0, nb = 0;
@@ -76,6 +80,7 @@ void HGCTBHisto::Loop(string outputfile, int nMaxEvt, int nPrintEvent, float bea
       if (jentry % 1000 == 0) std::cout << "  " << jentry  << "  Events Processed... " << std::endl;
 
       //if (jentry % 1000 == 0) cout << "sumEAll: " << sumEAll << endl;
+      h_NLayer->Fill(nLayer);
       h_SumEAll->Fill(sumEAll);
 
       if (nLayer<maxLayerEE) maxLayerEE=nLayer;
