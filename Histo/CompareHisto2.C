@@ -29,6 +29,7 @@ void CompareHisto(string tagf1, string file1, string tagf2, string file2, string
   TString tag11 = tagf1;
   TString tag22 = tagf2;
   TH1F *h11,*h22;
+  double h11Max, h22Max;
   TCanvas *can11 = new TCanvas("can11","",600,500);
   can11->SetRightMargin(0.10); can11->SetTopMargin(0.12);
   can11->SetLeftMargin(0.15);  can11->SetBottomMargin(0.10);
@@ -46,7 +47,8 @@ void CompareHisto(string tagf1, string file1, string tagf2, string file2, string
     std::cout<<key->GetName()<<": Mean Value: "<< h22->GetMean() << std::endl;
         
     h22->Scale(h11->Integral()/h22->Integral());
-
+    h11Max=h11->GetMaximum();
+    h22Max=h22->GetMaximum();
     //h11->Rebin(2); 
     //h22->Rebin(2);
     
@@ -70,9 +72,25 @@ void CompareHisto(string tagf1, string file1, string tagf2, string file2, string
     //h11->GetYaxis()->SetRangeUser(0,0.15);
     //h11->SetMarkerStyle(20);
     h11->SetLineColor(1);  h11->SetLineWidth(3);
-    h11->Draw();
+    //h11->Draw();
+    if (h11Max>=h22Max) {
+      h11->Draw("hist");
+      h11->SetTitle(hTitle);
+      h11->GetXaxis()->SetTitle(hxTitle);
+      h11->GetYaxis()->SetTitle(hyTitle);
+      h11->GetXaxis()->SetTitleOffset(1.1);
+      h22->Draw("hist same");
+    }
+    if (h22Max>=h11Max) {
+      h22->Draw("hist");
+      h22->SetTitle(hTitle);
+      h22->GetXaxis()->SetTitle(hxTitle);
+      h22->GetYaxis()->SetTitle(hyTitle);
+      h22->GetXaxis()->SetTitleOffset(1.1);
+      h11->Draw("hist same");
+    }
     h22->SetLineColor(2);    h22->SetLineWidth(2);
-    h22->Draw("hist same");
+    //h22->Draw("hist same");
     
     
     TLegend *leg = new TLegend(0.15,0.88,0.90,0.94);

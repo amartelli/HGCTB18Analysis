@@ -12,6 +12,8 @@ BESize=${#BeamE[@]}
 HistoName=(SumE E1byE7 E1byE19 E7byE19 E7byEAll E19byEAll )
 HNSize=${#HistoName[@]}
 
+make clean
+make
 
 for (( iBE=0; iBE<${BESize}; iBE++ ))
 do

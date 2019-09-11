@@ -1,19 +1,17 @@
 BaseDir=$PWD
-#Tagf1=Data
-#Tagf1V=v13  # i.e. v13 or ...
-Tagf1=MC
-Tagf1V=BeamProf_v1  # i.e. BeamProf_v1 or v2_withMCP_EMN_Angle or ..
+Tagf1=Data
+Tagf1V=v13  # i.e. v13 or ...
 Tagf2=MC
-Tagf2V=v2_withMCP_EMN_Angle  # i.e. BeamProf_v1 or v2_withMCP_EMN_Angle or ..
-Tagf3=Data
-Tagf3V=v13  # i.e. BeamProf_v1 or v2_withMCP_EMN_Angle or ..
+Tagf2V=BeamProf_v1  # i.e. BeamProf_v1 or v2_withMCP_EMN_Angle or ..
+Tagf3=MC
+Tagf3V=v2_withMCP_EMN_Angle  # i.e. BeamProf_v1 or v2_withMCP_EMN_Angle or ..
 Par=Ele
 
 #BeamE=( 20 30 50 80 100 120 200 250 300 )
 BeamE=( 30 100 250 )
 BESize=${#BeamE[@]}
 
-HistoName=(SumE E1byE7 E1byE19 E7byE19 E7byEAll E19byEAll )
+HistoName=(NLayer SumE E1byE7 E1byE19 E7byE19 E7byEAll E19byEAll )
 #HistoName=(SumE )
 HNSize=${#HistoName[@]}
 

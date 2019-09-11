@@ -29,6 +29,8 @@ void CompareHisto(string tagf1, string file1, string tagf2, string file2, string
   TString tag22 = tagf2;
   TString tag33 = tagf3;
   TH1F *h11,*h22,*h33;
+  double h11Max=0,h22Max=0,h33Max=0;
+
   TCanvas *can11 = new TCanvas("can11","",600,500);
   can11->SetRightMargin(0.10); can11->SetTopMargin(0.12);
   can11->SetLeftMargin(0.15);  can11->SetBottomMargin(0.10);
@@ -50,6 +52,9 @@ void CompareHisto(string tagf1, string file1, string tagf2, string file2, string
     h22->Scale(h11->Integral()/h22->Integral());
     h33->Scale(h11->Integral()/h33->Integral());
 
+    h11Max=h11->GetMaximum();
+    h22Max=h22->GetMaximum();
+    h33Max=h33->GetMaximum();
     //h11->Rebin(2); 
     //h22->Rebin(2);
     //h33->Rebin(2);
@@ -67,18 +72,37 @@ void CompareHisto(string tagf1, string file1, string tagf2, string file2, string
     else hxTitle = fileHistoName;
     TString hyTitle= "Events Normalized to Data";
 
-    h11->SetTitle(hTitle);
-    h11->GetXaxis()->SetTitle(hxTitle);
-    h11->GetYaxis()->SetTitle(hyTitle);
-    h11->GetXaxis()->SetTitleOffset(1.1);
     //h11->GetYaxis()->SetRangeUser(0,0.15);
     //h11->SetMarkerStyle(20);
     h11->SetLineColor(1);  h11->SetLineWidth(3);
-    h11->Draw();
+    if (h11Max>=h22Max && h11Max>=h33Max ) { 
+      h11->Draw("hist");
+      h11->SetTitle(hTitle);
+      h11->GetXaxis()->SetTitle(hxTitle);
+      h11->GetYaxis()->SetTitle(hyTitle);
+      h11->GetXaxis()->SetTitleOffset(1.1);
+      h22->Draw("hist same"); h33->Draw("hist same");
+    }
+    if (h22Max>=h11Max && h22Max>=h33Max ) { 
+      h22->Draw("hist"); 
+      h22->SetTitle(hTitle);
+      h22->GetXaxis()->SetTitle(hxTitle);
+      h22->GetYaxis()->SetTitle(hyTitle);
+      h22->GetXaxis()->SetTitleOffset(1.1);
+      h11->Draw("hist same"); h33->Draw("hist same");
+    }
+    if (h33Max>=h11Max && h33Max>=h22Max ) { 
+      h33->Draw("hist"); 
+      h33->SetTitle(hTitle);
+      h33->GetXaxis()->SetTitle(hxTitle);
+      h33->GetYaxis()->SetTitle(hyTitle);
+      h33->GetXaxis()->SetTitleOffset(1.1);
+      h11->Draw("hist same"); h22->Draw("hist same");
+    }
     h22->SetLineColor(2);    h22->SetLineWidth(2);
-    h22->Draw("hist same");
+    //h22->Draw("hist same");
     h33->SetLineColor(4);    h33->SetLineWidth(2);
-    h33->Draw("hist same");
+    //h33->Draw("hist same");
     
     
     TLegend *leg = new TLegend(0.10,0.88,0.98,0.95);
