@@ -12,6 +12,8 @@
 #include <string>
 #include <vector>
 
+#include "ComputeHGCALTime.h"
+
 using namespace std;
 
 float cellRad = 0.563 + 0.001; ///0.001 is the delta
@@ -40,6 +42,7 @@ public :
   float Cluster(unsigned int layer, int extend, float cut);    
   vector<float> LayerTimeDiff(unsigned int layer, int extend);
   float EnWeiLayerTime(unsigned int layer, int extend, float &sumE, bool applyTOFCorr);
+  float GetTime(unsigned int layer, int extend);
   
 private :
   bool  debug=false;  
@@ -54,7 +57,7 @@ private :
   vector< vector<float> > layer_rechit_en; 
   vector< vector<short int> > layer_rechit_u; vector< vector<short int> > layer_rechit_v; 
   vector< vector<float> > layer_rechit_x; vector< vector<float> > layer_rechit_y; 
-
+  vector< vector<float> > layer_rechit_time;
   vector< vector<float> > layer_rechit_t; vector< vector<float> > layer_rechit_tfh; 
   vector< vector<float> > layer_rechit_tlh;
   vector< vector<float> > layer_rechit_z;
@@ -63,6 +66,12 @@ private :
   vector<float> layer_maxhit_t; 
   vector<float> layer_maxhit_tfh;
   vector<float> layer_maxhit_tlh;  
+
+  // std::vector<float> layerRh;
+  // std::vector<float> timeRh;
+  // std::vector<float> energyRh;
+  // std::vector<float> xRh;
+  // std::vector<float> yRh;
 
   float firstlayer_rechit_z = -99999;
 
@@ -78,6 +87,12 @@ void HGCTBAlgo::Init(std::vector<float>& rechit_energy, std::vector<unsigned int
   float sum_rh_en=0, max_rh_en=0; 
 
 
+  // layerRh.clear();
+  // timeRh.clear();
+  // energyRh.clear();
+  // xRh.clear();
+  // yRh.clear();
+
   layer_maxhit_xy.clear();
   
   layer_imax.clear();
@@ -86,7 +101,7 @@ void HGCTBAlgo::Init(std::vector<float>& rechit_energy, std::vector<unsigned int
   layer_sum_en.clear();     layer_rechit_en.clear();  
   layer_rechit_u.clear();   layer_rechit_v.clear();
   layer_rechit_x.clear();   layer_rechit_y.clear();
-
+  layer_rechit_time.clear();
   ///SJ
   layer_rechit_t.clear();
   layer_rechit_tfh.clear();
@@ -108,7 +123,6 @@ void HGCTBAlgo::Init(std::vector<float>& rechit_energy, std::vector<unsigned int
 
   for(unsigned int ilayer=1; ilayer <= rechit_layer.back(); ilayer++){
 
-
     float sum_rh_en_lay=0, max_rh_en_lay=0;
     unsigned int imax_lay=99999;
     short int    umax_lay=999, vmax_lay=999;
@@ -124,6 +138,8 @@ void HGCTBAlgo::Init(std::vector<float>& rechit_energy, std::vector<unsigned int
     vector<short int> rhs_v_lay;  rhs_v_lay.clear();
     vector<float>     rhs_x_lay;  rhs_x_lay.clear();
     vector<float>     rhs_y_lay;  rhs_y_lay.clear();
+    //RA 
+    vector<float>     rhs_time_lay;  rhs_time_lay.clear();
 
     ///SJ
     vector<float>     rhs_t_lay; rhs_t_lay.clear();
@@ -132,14 +148,13 @@ void HGCTBAlgo::Init(std::vector<float>& rechit_energy, std::vector<unsigned int
 
     vector<float>     rhs_z_lay; rhs_z_lay.clear();
     
-    //cout << "istart_layer: " << istart_layer << endl;
+    if(debug) std::cout << "istart_layer: " << istart_layer << std::endl;
 
-    
-    for (unsigned int irechit=istart_layer; irechit < rechit_energy.size(); irechit++){
+    unsigned int totLayerHits = rechit_energy.size();
+    if(debug) std::cout << " nHits = " << totLayerHits << std::endl;    
+    for (unsigned int irechit=istart_layer; irechit < totLayerHits; irechit++){
       if (rechit_layer[irechit] != ilayer) break;
-      //if (rechit_layer[irechit] != ilayer) continue;
-      //cout << "irechit: " << irechit << endl;
-  
+
       if(rechit_energy[irechit]>=cut) sum_rh_en+=rechit_energy[irechit];
       if (rechit_energy[irechit] > max_rh_en) {max_rh_en = rechit_energy[irechit];
 	imax=irechit;
@@ -149,8 +164,18 @@ void HGCTBAlgo::Init(std::vector<float>& rechit_energy, std::vector<unsigned int
 	firstlayer_rechit_z = rechit_z[irechit]; 
 	notFilledZ = false;
       }
-      
 
+      //set to 15MIP
+      if(rechit_energy[irechit] < cut) continue;
+
+      float timeHit = rechit_time_mc[irechit];
+      if(rechit_time_mc[irechit] < rechit_time_mc_firstHit[irechit]) timeHit = rechit_time_mc_firstHit[irechit];
+      float dist3Dhit = sqrt(pow(rechit_x[irechit], 2) + pow(rechit_y[irechit], 2) + pow(rechit_z[irechit], 2));
+      float tofHit = dist3Dhit/speed_light;
+      float timeOffset = 110; //ns = 33m
+      if(debug)  std::cout << " dist3Dhit = " << dist3Dhit << " tof = " << tofHit << " timeHit = " << timeHit 
+			   << " timeOffset = " << timeOffset << std::endl;
+      timeHit = timeHit - tofHit - timeOffset; 
 
       if(rechit_energy[irechit]>=cut) sum_rh_en_lay+=rechit_energy[irechit];
 
@@ -171,7 +196,7 @@ void HGCTBAlgo::Init(std::vector<float>& rechit_energy, std::vector<unsigned int
 	
 	zmax_lay=rechit_z[irechit]; 
 	
-      }//for max hit
+      }//for max hit per layer
     
       
       rhs_en_lay.push_back(rechit_energy[irechit]);
@@ -179,7 +204,9 @@ void HGCTBAlgo::Init(std::vector<float>& rechit_energy, std::vector<unsigned int
       rhs_v_lay.push_back(rechit_iv[irechit]);
       rhs_x_lay.push_back(rechit_x[irechit]);
       rhs_y_lay.push_back(rechit_y[irechit]);
-
+      //RA 
+      rhs_time_lay.push_back(timeHit);
+      
 
       //SJ
       rhs_t_lay.push_back(rechit_time_mc[irechit]);
@@ -193,7 +220,7 @@ void HGCTBAlgo::Init(std::vector<float>& rechit_energy, std::vector<unsigned int
 
     } // rechit loop
 
-    //cout<<"===================================="<<endl;
+    if(debug) std::cout << "========== loop over recHits ==========================" << std::endl;
 
 
 
@@ -201,8 +228,8 @@ void HGCTBAlgo::Init(std::vector<float>& rechit_energy, std::vector<unsigned int
     layer_maxhit_en.push_back(max_rh_en_lay);
     layer_imax.push_back(imax_lay);
     
-    if (debug) cout << "layer imax_layer umax_layer vmax_layer: " 
-	 << ilayer << " " << imax_lay << " " << umax_lay << " " << vmax_lay << endl;
+    if (debug) std::cout << "layer imax_layer umax_layer vmax_layer: " 
+			 << ilayer << " " << imax_lay << " " << umax_lay << " " << vmax_lay << std::endl;
     layer_maxhit_uv.push_back( make_pair(umax_lay,vmax_lay) );
     layer_maxhit_xy.push_back( make_pair(xmax_lay,ymax_lay) );
     ///SJ
@@ -217,7 +244,7 @@ void HGCTBAlgo::Init(std::vector<float>& rechit_energy, std::vector<unsigned int
     layer_rechit_v.push_back(rhs_v_lay);
     layer_rechit_x.push_back(rhs_x_lay);
     layer_rechit_y.push_back(rhs_y_lay);
-
+    layer_rechit_time.push_back(rhs_time_lay);
     layer_rechit_z.push_back(rhs_z_lay);
 
     ///SJ
@@ -228,6 +255,8 @@ void HGCTBAlgo::Init(std::vector<float>& rechit_energy, std::vector<unsigned int
     rhs_en_lay.clear();
     rhs_u_lay.clear();  rhs_v_lay.clear();
     rhs_x_lay.clear();  rhs_y_lay.clear();
+    //RA
+    rhs_time_lay.clear();
 
     rhs_t_lay.clear();  rhs_tfh_lay.clear(); rhs_tlh_lay.clear();
     
@@ -236,6 +265,8 @@ void HGCTBAlgo::Init(std::vector<float>& rechit_energy, std::vector<unsigned int
   } // layer loop
 
   sum_en=sum_rh_en; maxhit_en=max_rh_en;
+
+  if(debug) std::cout << " fine main loop " << std::endl;
 }
 
 // Return sum of all rechits energy with a given threshold cut
@@ -379,8 +410,7 @@ float HGCTBAlgo::EnWeiLayerTime(unsigned int layer, int extend, float &sumE, boo
 
 
   if(firstlayer_rechit_z < 0) {
-   
-    cout<<"WARNING!!!! did not find firstlayer_rechit_z, pls check hte code. Stopping here"<<endl;
+    std::cout << "WARNING!!!! did not find firstlayer_rechit_z, pls check hte code. Stopping here" << std::endl;
     exit(1);
   }
   
@@ -447,4 +477,69 @@ float HGCTBAlgo::EnWeiLayerTime(unsigned int layer, int extend, float &sumE, boo
 
   return layerTime;
 }//float HGCTBAlgo::ClusterTime(unsigned int layer, int extend, float cut)
+
+
+
+
+// energy weighted 
+float HGCTBAlgo::GetTime(unsigned int layer, int extend){
+  if(debug) std::cout << " hello in GetTime " << std::endl;
+
+  float maxX;
+  float maxY;
+  float maxE = 0.;
+
+  unsigned int startLayer = layer;
+  unsigned int endLayer = layer+1;
+  if(layer == -1){
+    startLayer = 1;
+    endLayer = 30;
+  }
+
+  if(debug)  std::cout << " startLayer = " << startLayer << " endLayer = " << endLayer << std::endl;
+
+  for(unsigned int ij = startLayer; ij<endLayer; ++ij){
+
+    auto size = layer_rechit_en[ij-1].size();
+    if(debug) std::cout << " size = " << size << std::endl;
+    for(auto iR=0; iR<size; ++iR){
+      float en = layer_rechit_en[ij-1][iR];
+
+      if(en > maxE){
+	maxX = layer_rechit_x[ij-1][iR];
+	maxY = layer_rechit_y[ij-1][iR];
+	maxE = en;
+      }
+    }
+  }
+
+  if(debug) std::cout << " >>> maxX = " << maxX << " maxY = " << maxY << " maxE = " << maxE << std::endl;
+
+  std::vector<float> times;
+  std::vector<float> energies;
+  for(unsigned int ij = startLayer; ij<endLayer; ++ij){
+
+    auto size = layer_rechit_en[ij-1].size();
+    for(auto iR=0; iR<size; ++iR){
+      float x = layer_rechit_x[ij-1][iR];
+      float y = layer_rechit_y[ij-1][iR];
+
+      float rad = sqrt( pow(x-maxX, 2) + pow(y-maxY, 2) );
+      if(rad > (2*extend+1)*cellRad ) continue;
+
+      float en = layer_rechit_en[ij-1][iR];
+      float time = layer_rechit_time[ij-1][iR];
+      times.push_back(time);
+      energies.push_back(en);
+    }
+  }
+
+  if(debug) std::cout << " in getTime size = " << times.size()  << std::endl;
+  
+  if(times.size() >= 3){
+    float averageTime = hgcaltime::fixSizeHighestDensity(times, energies);
+    return(averageTime);
+  }
+  else return -99.;
+}
 

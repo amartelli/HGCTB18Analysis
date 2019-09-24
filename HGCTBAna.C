@@ -47,7 +47,7 @@ void HGCTBAna::Loop(string finName, string outputfile, int nTotEvt, int nPrintEv
    float xmax = 112;
    
    for(int il=1; il<=nLayer; il++){
-     
+
      hmap[Form("time_layer%d_nR0",il)] = new TH1F( Form("time_layer%d_nR0",il), Form("time_layer%d_nR0",il), nbins, xmin, xmax);
 
        for(int iR=1; iR<=2; iR++){
@@ -57,6 +57,13 @@ void HGCTBAna::Loop(string finName, string outputfile, int nTotEvt, int nPrintEv
 
 	 //hmap[Form("timeDiff_layer%d_nR%d",il,iR)] = new TH1F( Form("timeDiff_layer%d_nR%d",il,iR), Form("timeDiff_layer%d_nR%d",il,iR), 1000, -10, 10);
 	 hmap[Form("timeDiff_layer%d_nR%d",il,iR)] = new TH1F( Form("timeDiff_layer%d_nR%d",il,iR), Form("timeDiff_layer%d_nR%d",il,iR), 1000, -0.3, 0.3);
+
+	 if(il ==1){
+	   //all layers together
+	   hmap[Form("avgTime_layer-1_nR%d", iR)] = new TH1F( Form("avgTime_layer-1_nR%d", iR), "", 1000, -5., 10.);     
+	 }
+
+	 hmap[Form("avgTime_layer%d_nR%d",il, iR)] = new TH1F( Form("avgTime_layer%d_nR%d",il, iR), "", 1000, -5., 10.);
 
        }//
    }//For(ing il=0; il<nLayer; il++)
@@ -131,6 +138,8 @@ void HGCTBAna::Loop(string finName, string outputfile, int nTotEvt, int nPrintEv
 	float E19 = h1.Cluster(iLayer,2,mipCut);	
 	//float E37 = h1.Cluster(iLayer,3,mipCut);
 
+	//std::cout << " >>> fine Cluster in Ana " << std::endl;
+
 	sumELayer.push_back(sumE);
 	maxELayer.push_back(maxE);
 	E1Layer.push_back(E1);
@@ -154,6 +163,7 @@ void HGCTBAna::Loop(string finName, string outputfile, int nTotEvt, int nPrintEv
 	if(debug){
 	  cout<<"calling EnWeiLayerTime for layer "<<iLayer-1<<endl;
 	}
+
 	float tmpsumE_layer = 0;
 	float layertime_centralCell = h1.EnWeiLayerTime(iLayer, 0, tmpsumE_layer, applyTOFCorr);
 	EiWeiTimeAllLayers[0] += layertime_centralCell * tmpsumE_layer;  ///because layertime_centralCell is / by tmpsumE_layer
@@ -186,6 +196,17 @@ void HGCTBAna::Loop(string finName, string outputfile, int nTotEvt, int nPrintEv
 	  
 	  hmap[Form("time_EachLayerTime_allinOne_nR%d",iR)]->Fill(layertime);
 
+	  ////
+	  //std::cout << " now time final " << std::endl;
+	  if(iLayer == 1){
+	    float averageTimeAll = h1.GetTime(-1, iR);
+	    //std::cout << " averageTimeAll = " << averageTimeAll << std::endl;
+	    hmap[Form("avgTime_layer-1_nR%d", iR)]->Fill(averageTimeAll);
+	  }
+	  float averageTime = h1.GetTime(iLayer, iR);
+	  //std::cout << " averageTime = " << averageTime << std::endl;
+	  hmap[Form("avgTime_layer%d_nR%d", iLayer, iR)]->Fill(averageTime);
+
 	}//for(int iR=1; iR<=2; iR++)
 
       
@@ -214,6 +235,7 @@ void HGCTBAna::Loop(string finName, string outputfile, int nTotEvt, int nPrintEv
    ///Write the histogram
    ofile->cd();
    for(map<string,TH1F*>::iterator it = hmap.begin(); it != hmap.end(); ++it) {
+     // std::cout << " writing histo = " << it->first << std::endl;
      hmap[it->first]->Write();
    }
 
